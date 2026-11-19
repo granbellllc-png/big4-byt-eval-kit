@@ -144,6 +144,31 @@ def main() -> int:
             ensure_ascii=False,
         )
     print(f"\nSaved evaluation report to {report_path}")
+
+    summary_path = os.environ.get("BIG4_SUMMARY_PATH", "DEVOTEAM_EVAL_SUMMARY.md")
+    stats = (stats_body.get("big4_ciclo5") or {}).get("stats") or {}
+    lines = [
+        "# BIG4 BYT Evaluation Summary",
+        "",
+        f"- **Endpoint:** `{ENDPOINT}`",
+        f"- **Model:** `{MODEL}`",
+        f"- **Total Calls:** `{stats.get('total_calls', len(report_items))}` · **Revision Rate:** `{stats.get('revision_rate_pct', 'N/A')}%`",
+        "",
+        "| Test Case | Status | Delta Epistemico | Naked (ms) | Big4 (ms) | Ed25519 Receipt |",
+        "| :--- | :--- | :--- | ---: | ---: | :--- |",
+    ]
+    for item in report_items:
+        if "error" in item:
+            lines.append(f"| {item['name']} | ERROR | - | - | - | - |")
+        else:
+            delta = (item.get("epistemic_delta") or {}).get("status", "N/A")
+            t = item.get("timing") or {}
+            lines.append(
+                f"| {item['name']} | OK | `{delta}` | {t.get('naked_ms', '-')} | {t.get('big4_ms', '-')} | `{item.get('receipt_status', 'N/A')}` |"
+            )
+    with open(summary_path, "w", encoding="utf-8") as sfh:
+        sfh.write("\n".join(lines) + "\n")
+    print(f"Saved executive summary to {summary_path}")
     return 0
 
 
