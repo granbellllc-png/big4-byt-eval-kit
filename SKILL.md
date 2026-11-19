@@ -40,6 +40,7 @@ Puoi controllare ogni singola chiamata anteponendo o inserendo uno o più hook n
 | `/big4` | Esegue **solo** la pipeline verificata Big4 | Alla fine della risposta **BIG4** (se `/veritas-on`) |
 | `/veritas-on` *(default)* | Abilita il footer VERITAS + Delta Epistemico (nella lingua del prompt) | Come sopra |
 | `/veritas-off` | Disabilita il footer VERITAS testuale (output pulito) | Nessun footer testuale |
+| `/todo-on` / `/todo-off` | Attiva (default) o disattiva il **Registro Operativo GTD a Semaforo** (`🔴/🟡 5m/🟢` + `Done/Ongoing/Next/Stand-by`) sull'output Big4 | `big4_ciclo5.todo_mode = "on" \| "off"` |
 | `/stats` | Restituisce la scorecard in-RAM della sessione (`0` token LLM) | — |
 | `/inject-flaw` | Fault-injection controllato sul candidato prima del critic `T=0` | Come `/both` o `/big4` |
 
@@ -53,7 +54,7 @@ Puoi controllare ogni singola chiamata anteponendo o inserendo uno o più hook n
 
 ### Controllo Programmatico (Header HTTP / JSON Body)
 Se la tua harness non vuole modificare i prompt di benchmark con gli slash-command, puoi impostare modalità e footer programmaticamente:
-- **Header HTTP:** `X-Big4-Eval-Mode: naked | big4 | both` e `X-Big4-Veritas: on | off`
+- **Header HTTP:** `X-Big4-Eval-Mode: naked | big4 | both`, `X-Big4-Veritas: on | off` e `X-Big4-Todo: on | off`
 - **Campo JSON nel body:** `"big4_eval": { "mode": "both", "veritas": false }`
 *(Gli eventuali slash-command nel prompt hanno comunque priorità sugli header/body.)*
 

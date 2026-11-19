@@ -19,11 +19,12 @@ Client-side evaluation kit for testing the **BIG4 BYT (Bring Your Token)** OpenA
 
 | Hook | Behavior |
 | :--- | :--- |
-| *(default on `big4-byt-eval`)* | Runs `NAKED` first, VERITAS footer, then `BIG4` (`/both` + `/veritas-on`) |
+| *(default on `big4-byt-eval`)* | Runs `NAKED` first, VERITAS footer, then `BIG4` (`/both` + `/veritas-on` + `/todo-on`) |
 | `/naked` | Runs your BYT baseline model only |
 | `/big4` | Runs the verified Big4 pipeline only |
 | `/both` | Runs `NAKED` first, then `BIG4` |
 | `/veritas-on` / `/veritas-off` | Enables or disables the VERITAS footer + Epistemic Delta |
+| `/todo-on` / `/todo-off` | Enables (default) or disables the GTD Semaphore & Task Registry (`🚦 REGISTRO OPERATIVO GTD`) on `BIG4` |
 | `/inject-flaw` | Injects a controlled synthetic flaw before the `T=0` critic |
 | `/stats` | Returns in-RAM session scorecard (`0` LLM tokens) |
 
