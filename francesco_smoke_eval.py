@@ -20,7 +20,10 @@ import urllib.request
 ENDPOINT = os.environ.get("BIG4_ENDPOINT", "https://104-207-84-209.sslip.io/v1/chat/completions")
 BIG4_API_KEY = os.environ.get("BIG4_API_KEY", "").strip()
 BYT_API_KEY = os.environ.get("BYT_API_KEY", "").strip()
-MODEL = os.environ.get("BIG4_MODEL", "big4-byt-eval:openai/gpt-4o")
+CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "").strip()
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()
+MODEL = os.environ.get("BIG4_MODEL", "big4-byt-eval:cerebras/gpt-oss-120b" if CEREBRAS_API_KEY else "big4-byt-eval:openai/gpt-4o")
 
 TRAP_PROMPTS = [
     {
@@ -65,9 +68,26 @@ def call_big4(prompt: str, extra_headers: dict | None = None) -> tuple[dict, dic
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {BIG4_API_KEY}",
-        **({"X-Big4-BYT-Provider-Key": BYT_API_KEY} if BYT_API_KEY else {}),
         **(extra_headers or {}),
     }
+
+    # Pass the multi-key keyring JSON header if provided
+    keyring = {}
+    if CEREBRAS_API_KEY:
+        keyring["cerebras"] = CEREBRAS_API_KEY
+    if GROQ_API_KEY:
+        keyring["groq"] = GROQ_API_KEY
+    if OPENROUTER_API_KEY:
+        keyring["openrouter"] = OPENROUTER_API_KEY
+
+    if keyring:
+        headers["X-Big4-Provider-Keys"] = json.dumps(keyring)
+        if "cerebras" in keyring and not BYT_API_KEY:
+            headers["X-Big4-BYT-Provider-Key"] = keyring["cerebras"]
+        elif "openrouter" in keyring and not BYT_API_KEY:
+            headers["X-Big4-BYT-Provider-Key"] = keyring["openrouter"]
+    elif BYT_API_KEY:
+        headers["X-Big4-BYT-Provider-Key"] = BYT_API_KEY
     payload = json.dumps(
         {
             "model": MODEL,
@@ -85,8 +105,12 @@ def main() -> int:
     if not BIG4_API_KEY:
         print("ERROR: set BIG4_API_KEY in your environment before running.", file=sys.stderr)
         return 1
-    if not BYT_API_KEY:
-        print("ERROR: set BYT_API_KEY in your environment before running.", file=sys.stderr)
+    if not (BYT_API_KEY or CEREBRAS_API_KEY or GROQ_API_KEY or OPENROUTER_API_KEY):
+        print(
+            "ERROR: Set the 3 BYT keys in .env (CEREBRAS_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY) "
+            "or set BYT_API_KEY.",
+            file=sys.stderr,
+        )
         return 1
 
     report_items = []
